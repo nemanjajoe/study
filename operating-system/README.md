@@ -8,8 +8,8 @@ before you delve into operating system, make sure you have had:
 
 ## Material helps you learn more efficiently
 ### books:
-    * 1.Operating Systems: three easy pecies.
-    * 2.Expert C Programming.
-    * 3.C Traps and Pitfalls.
-    * 4.Pointers on C.
-    * 5.Advanced Programming in the UNIX Environment.
+* 1.Operating Systems: three easy pecies.
+* 2.Expert C Programming.
+* 3.C Traps and Pitfalls.
+* 4.Pointers on C.
+* 5.Advanced Programming in the UNIX Environment.
