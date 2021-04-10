@@ -1,17 +1,5 @@
- // all libaray headers {{{
-#include<pthread.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<sys/sysinfo.h>
-#include<sys/mman.h>
-#include<sys/types.h>
-#include<sys/stat.h>
-#include<unistd.h>
-#include <fcntl.h>
-#define MIN 128
-#define MAX 1024
-//}}}
+#include "headFile.h"
+
 // function and structure defination {{{
     // define a struct that stands for the range of a file a thread should compress
 typedef struct _rangeComp_t {
@@ -32,6 +20,7 @@ char *getZipName(char *file){/*{{{*/
     printf("file : %s\n", file);
     for(int i = 0, len = strlen(file); i < len; i++){
                 // debug: printf("%c\n",file[i]);
+            if(*(file + i) == '/') continue;
             if((*(file + i) == '.') || (i == len)){
                 strncpy(zipName,file,i);
                 strcat(zipName,".z");
@@ -70,7 +59,7 @@ int main(int argc, char *argv[]){
         error_quit("can not open the file!\n");
     }
         // create a file used to store compressed data
-    if((fdout = open(dest = getZipName(argv[1]), O_RDWR|O_CREAT|O_TRUNC, 0x0444)) < 0){
+    if((fdout = open(dest = getZipName(argv[1]), O_RDWR|O_CREAT|O_TRUNC, S_IRUSR|S_IRGRP|S_IROTH)) < 0){
         error_quit("can not create file\n");
     }
         //get the state of the input file

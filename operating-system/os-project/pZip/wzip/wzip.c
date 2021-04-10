@@ -28,6 +28,7 @@ int main(int argc, char *argv[]){
     ssize_t strLineNum;
     char *lptr = NULL;
     for (int i = 1; i < argc; i++){/*{{{*/
+        int startcpy = 0, endcpy = 0;
         const char *file = argv[i];
         char *zipName = malloc(sizeof(char)*MAX);
         // open files passed in, report error if open failure{{{
@@ -38,14 +39,22 @@ int main(int argc, char *argv[]){
         } //}}}
         //create a new file and have the file name stored in zipName {{{
         for(int i = 0, len = strlen(file); i < len; i++){
-                // debug: printf("%c\n",file[i]);
-            if((*(file + i) == '.') || (i == len)){
-                strncpy(zipName,file,i);
-                strcat(zipName,".z");
-                printf("%s\n",zipName);
+            if (*(file + i) == '/') {
+                startcpy = i;
+                continue;
+            }
+        }
+        for (int i = startcpy, len = strlen(file); i < len; i++){
+            if(*(file + i) == '.' || (i == len)){
+                endcpy = i;
                 break;
             }
         }
+        for (int i = startcpy + 1, j = 0; i < endcpy; i++, j++){
+            zipName[j] = file[i];
+        }
+        strcat(zipName,".z");
+        printf("zip file : %s\n",zipName);
         zipFile = fopen(zipName,"w"); // }}}
         // compress file to zipFile {{{
         while((strLineNum = getline(&lptr,&size,fptr)) != -1){
@@ -63,7 +72,7 @@ int main(int argc, char *argv[]){
                 }
             }
             fputs(buffer,zipFile);
-            printf("line compress: %s", buffer);
+            //printf("line compress: %s", buffer);
         } // }}}
         fclose(fptr);
         fclose(zipFile);
