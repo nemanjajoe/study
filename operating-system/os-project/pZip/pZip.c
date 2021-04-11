@@ -30,8 +30,8 @@ void error_quit(char *msg){
     exit(0);
 } // }}}
 
-    // convert to the zip file name {{{
-void getZipName(char *file, char *zipName){
+    // caculate the zip file name and store it to nameBuff {{{
+int getZipName(char *file, char *zipName){
     int startcpy = 0, endcpy = 0, len = strlen(file);
     printf("file : %s\n", file);
     for(int i = 0; i < len; i++){
@@ -47,14 +47,15 @@ void getZipName(char *file, char *zipName){
         }
     }
     for (int i = startcpy, j = 0; i < endcpy; i++, j++){
-        printf("startcpy is %d, endcpy is %d, and c is %c\n",startcpy, endcpy,file[i]);
+        //printf("startcpy is %d, endcpy is %d, and c is %c\n",startcpy, endcpy,file[i]);
         zipName[j] = file[i];
         if ( i == endcpy - 1){
             zipName[j + 1] = '.';
             zipName[j + 2] = 'z';
         }
     }
-    printf("zip file : %s\n",zipName);
+    //printf("zip file : %s\n",zipName);
+    return 2 + endcpy - startcpy;
 } // }}}
 
 // threads' compression process {{{
@@ -90,11 +91,10 @@ void *worker(void *range){
 } // }}}
 // function and structure defination end }}}
 
-
 int main(int argc, char *argv[]){
-    int fdin,fdout,len,numcpu = get_nprocs();
+    int fdin,fdout,len,numcpu = get_nprocs(),nameLen;
     int secucess[numcpu];
-    char *src, zipName[MIN];
+    char *src, nameBuff[MIN];
     struct stat statbuff;
     // prerequisites and checks for all the subsequent process {{{
     if (argc < 2) {
@@ -105,11 +105,14 @@ int main(int argc, char *argv[]){
         error_quit("can not open the file!\n");
     }
         // create a file used to store compressed data
-    getZipName(argv[1], zipName);
-    if(open(zipName, O_RDONLY) > 0) {
-        zipName[strlen(zipName) - 1] = 'z';
-    }else if ((fdout = open(zipName, O_RDWR|O_TRUNC|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH)) < 0){
-        error_quit("can not create file\n");
+    if((nameLen = getZipName(argv[1],nameBuff)) > 0){
+        char *name = malloc(sizeof(char)*nameLen);
+        strncpy(name, nameBuff, nameLen);
+        printf("zip flie : %s\n", name);
+        if ((fdout = open(name, O_RDWR|O_TRUNC|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH)) < 0){
+            error_quit("can not create file\n");
+        }
+        free(name);
     }
         //get the state of the input file
     if(fstat(fdin,&statbuff) < 0){
