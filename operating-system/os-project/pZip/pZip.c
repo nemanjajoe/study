@@ -1,54 +1,100 @@
 #include "headFile.h"
+// functions and structures  {{{
+    // structures and initialize function {{{
+typedef struct _file_t {
+    char *file;
+    int fdout;
+    int *flag;
+    sem_t sema;
+    pthread_mutex_t lock;
+} file_t;
 
-// function and structure defination {{{
-    // define a struct that stands for the range of a file a thread should compress
+file_t allFile;
+
 typedef struct _rangeComp_t {
-    char *target;
     int base;
     int bound;
     int threadID;
 } rangeComp_t;
+
+void init(file_t *f, char *file, int fdout, int *secucess){
+    f->file = file;
+    f->fdout = fdout;
+    f->flag = secucess;
+    sem_init(&f->sema, 0, 1);
+    pthread_mutex_init(&f->lock, NULL);
+}
     // report error and exit
 void error_quit(char *msg){
     printf("%s",msg);
     exit(0);
-}
-    // get the file name and convert it to the zip file name
-char *getZipName(char *file){/*{{{*/
-    char name[MIN];
-    char *zipName = name;
+} // }}}
+
+    // convert to the zip file name {{{
+void getZipName(char *file, char *zipName){
+    int startcpy = 0, endcpy = 0, len = strlen(file);
     printf("file : %s\n", file);
-    for(int i = 0, len = strlen(file); i < len; i++){
-                // debug: printf("%c\n",file[i]);
-            if(*(file + i) == '/') continue;
-            if((*(file + i) == '.') || (i == len)){
-                strncpy(zipName,file,i);
-                strcat(zipName,".z");
-                printf("zip file : %s\n",zipName);
-                break;
-            }
+    for(int i = 0; i < len; i++){
+        if (*(file + i) == '/') {
+            startcpy = i + 1;
+            continue;
         }
-    return zipName;
-}/*}}}*/
-    // threads' functionality of compression. in other words, the compression function
-void compress(char *target, int base, int bound){
+    }
+    for (int i = startcpy; i < len; i++){
+        if(*(file + i) == '.' || (i == len - 1)){
+            endcpy = i;
+            break;
+        }
+    }
+    for (int i = startcpy, j = 0; i < endcpy; i++, j++){
+        printf("startcpy is %d, endcpy is %d, and c is %c\n",startcpy, endcpy,file[i]);
+        zipName[j] = file[i];
+        if ( i == endcpy - 1){
+            zipName[j + 1] = '.';
+            zipName[j + 2] = 'z';
+        }
+    }
+    printf("zip file : %s\n",zipName);
+} // }}}
 
+// threads' compression process {{{
+    // function of compression
+void compress(char *file, char *buffer, int start, int end){
+    for (int i = start, j = 0; i < end; i++){
+        buffer[j++] = 'a';
+    }
 }
-    // threads' functionaliy of combination that coalesces the thread's compression
-void combine(){
-
+    // coalesces each thread's compression segment together
+void combine(char *buffer, file_t *all, rangeComp_t *r){
+    size_t size = (size_t) r->bound - r->base;
+    if(r->threadID != 0 && all->flag[r->threadID - 1] == 0){
+        sem_wait(&all->sema);
+    }
+    pthread_mutex_lock(&all->lock);
+    write(all->fdout, buffer, size);
+    all->flag[r->threadID] = 1;
+    sem_post(&all->sema);
+    pthread_mutex_unlock(&all->lock);
 }
     // the working function of threads
 void *worker(void *range){
-    rangeComp_t *r = (rangeComp_t *) range;
+    file_t *all = &allFile;
+    rangeComp_t *r = range;
+    int size = r->bound - r->base;
+    char *buffer = malloc(sizeof(char)*size);
     printf("threads %d: compress file from %d to %d\n", r->threadID, r->base, r->base + r->bound);
+    compress(all->file, buffer, r->base, r->bound);
+    combine(buffer, all, r);
+    free(buffer);
     return NULL;
-}
+} // }}}
 // function and structure defination end }}}
+
 
 int main(int argc, char *argv[]){
     int fdin,fdout,len,numcpu = get_nprocs();
-    char *src, *dest;
+    int secucess[numcpu];
+    char *src, zipName[MIN];
     struct stat statbuff;
     // prerequisites and checks for all the subsequent process {{{
     if (argc < 2) {
@@ -59,7 +105,10 @@ int main(int argc, char *argv[]){
         error_quit("can not open the file!\n");
     }
         // create a file used to store compressed data
-    if((fdout = open(dest = getZipName(argv[1]), O_RDWR|O_CREAT|O_TRUNC, S_IRUSR|S_IRGRP|S_IROTH)) < 0){
+    getZipName(argv[1], zipName);
+    if(open(zipName, O_RDONLY) > 0) {
+        zipName[strlen(zipName) - 1] = 'z';
+    }else if ((fdout = open(zipName, O_RDWR|O_TRUNC|O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH)) < 0){
         error_quit("can not create file\n");
     }
         //get the state of the input file
@@ -72,21 +121,25 @@ int main(int argc, char *argv[]){
     }
     // }}}
     // create threads and start compression process {{{
+    init(&allFile,src,fdout,secucess);
     len = strlen(src);
     pthread_t tid[numcpu];
-    rangeComp_t range[numcpu], *r;
+    rangeComp_t range[numcpu];
+    rangeComp_t *r;
     for(int i = 0, size = len / numcpu; i < numcpu; i++){
-        range[i].target = src;
+        // initialize a thread's workload
         range[i].base = size*i;
         range[i].bound = size;
         range[i].threadID = i;
+        secucess[i] = 0;
         // last one range shoud have a extra remainder of bound
-        if (i == 3) range[i].bound += size % numcpu;
+        if (i == numcpu - 1) range[i].bound += size % numcpu;
         r = &range[i];
         if(pthread_create(&tid[i],NULL,worker, (void *) r) != 0){
             error_quit("thread creation failed\n");
         }
     }
+
     for(int i = 0; i < numcpu; i++){
         if(pthread_join(tid[i],NULL) != 0){
             error_quit("thread join failed\n");
