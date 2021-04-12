@@ -21,7 +21,7 @@ void init(file_t *f, char *file, int fdout, int *secucess){
     f->file = file;
     f->fdout = fdout;
     f->flag = secucess;
-    sem_init(&f->sema, 0, 1);
+    sem_init(&f->sema, 0, 0);
     pthread_mutex_init(&f->lock, NULL);
 }
     // report error and exit
@@ -31,7 +31,7 @@ void error_quit(char *msg){
 } // }}}
 
     // caculate the zip file name and store it to nameBuff {{{
-int getZipName(char *file, char *zipName){
+ int getZipName(char *file, char *zipName){
     int startcpy = 0, endcpy = 0, len = strlen(file);
     printf("file : %s\n", file);
     for(int i = 0; i < len; i++){
@@ -58,35 +58,67 @@ int getZipName(char *file, char *zipName){
     return 2 + endcpy - startcpy;
 } // }}}
 
+// put number into buffer {{{
+void putNumber(int number, char *buff, int *index){
+    int len = 0, remainder;
+    char reverse[MAX];
+    while(number > 0){
+        remainder = number%10;
+        reverse[len] = remainder + '0';
+        len++;
+        number /= 10;
+    }
+    while(len > 0){
+        buff[*index] = reverse[len - 1];
+        *index = *index + 1;
+        len--;
+    }
+} // }}}
+
 // threads' compression process {{{
     // function of compression
-void compress(char *file, char *buffer, int start, int end){
-    for (int i = start, j = 0; i < end; i++){
-        buffer[j++] = 'a';
+char* compress(char *file, int start, int end){
+    char temp[MAX], *buffer;
+    int count, num;
+    //printf("file length is %d compress from %d to %d\n",(int) strlen(file), start, end);
+    for(int i = start, j = 0, pre = start; i < end; i++){
+        if(file[i] == file[pre]){
+            count++;
+        }else{
+            putNumber(count, temp, &j);
+            temp[j] = file[pre];
+            j++;
+            pre = i;
+            count = 1;
+        }
     }
+    num = strlen(temp);
+    buffer = malloc(sizeof(char)*num);
+    strncpy(buffer, temp, num);
+    printf("temp is %s, buffer is %s\n", temp, buffer);
+    return buffer;
 }
     // coalesces each thread's compression segment together
 void combine(char *buffer, file_t *all, rangeComp_t *r){
-    size_t size = (size_t) r->bound - r->base;
-    if(r->threadID != 0 && all->flag[r->threadID - 1] == 0){
-        sem_wait(&all->sema);
+    size_t size = (size_t) strlen(buffer);
+    while((r->threadID != 0) && (all->flag[r->threadID - 1] == 0)){
+        //printf("thread %d: for thread %d to finish\n",r->threadID, r->threadID - 1);
     }
     pthread_mutex_lock(&all->lock);
     write(all->fdout, buffer, size);
     all->flag[r->threadID] = 1;
-    sem_post(&all->sema);
+    printf("thread %d: conbine over\n", r->threadID);
     pthread_mutex_unlock(&all->lock);
 }
     // the working function of threads
 void *worker(void *range){
     file_t *all = &allFile;
     rangeComp_t *r = range;
-    int size = r->bound - r->base;
-    char *buffer = malloc(sizeof(char)*size);
-    printf("threads %d: compress file from %d to %d\n", r->threadID, r->base, r->base + r->bound);
-    compress(all->file, buffer, r->base, r->bound);
+    char *buffer;
+    printf("thread %d: compress file from %d to %d\n", r->threadID, r->base, r->base + r->bound);
+    buffer = compress(all->file, r->base,r->base + r->bound);
     combine(buffer, all, r);
-    free(buffer);
+    //printf("thread %d: conbine over\n",r->threadID);
     return NULL;
 } // }}}
 // function and structure defination end }}}
@@ -136,7 +168,10 @@ int main(int argc, char *argv[]){
         range[i].threadID = i;
         secucess[i] = 0;
         // last one range shoud have a extra remainder of bound
-        if (i == numcpu - 1) range[i].bound += size % numcpu;
+        if (i == numcpu - 1) {
+            range[i].bound += len % size;
+            //printf("last thread will compress from %d to %d\n",range[i].base, range[i].bound + range[i].base);
+        }
         r = &range[i];
         if(pthread_create(&tid[i],NULL,worker, (void *) r) != 0){
             error_quit("thread creation failed\n");

@@ -11,5 +11,5 @@
 #include<unistd.h>
 #include <fcntl.h>
 #define MIN 128
-#define MAX 1024
+#define MAX 1024*128
 //}}}
