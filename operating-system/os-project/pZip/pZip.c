@@ -81,7 +81,7 @@ char* compress(char *file, int start, int end){
     char temp[MAX], *buffer;
     int count, num;
     //printf("file length is %d compress from %d to %d\n",(int) strlen(file), start, end);
-    for(int i = start, j = 0, pre = start; i < end; i++){
+    for(int i = start, j = 0, pre = start;j < MAX && i < end; i++){
         if(file[i] == file[pre]){
             count++;
         }else{
