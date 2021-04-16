@@ -6,3 +6,6 @@
 #include<string.h>
 #include<fcntl.h>
 #include<time.h>
+#include <dirent.h>
+
+#define MAX 256
