@@ -1,11 +1,5 @@
 #include "commonHead.h"
 
-void error_quit(char *msg){
-    if(!!msg){
-        printf("%s",msg);
-    }
-    exit(0);
-}
 
 void printStat(struct stat *s){
     char *blank = "     ";
