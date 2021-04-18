@@ -1,18 +1,6 @@
 #include "commonHead.h"
 
 
-void printStat(struct stat *s){
-    char *blank = "     ";
-    printf("Device ID: %u%s",(unsigned int) s->st_dev, blank);
-    printf("inode number: %u%s",(unsigned int) s->st_ino, blank);
-    printf("file mode: %o\n",(unsigned int) s->st_mode);
-    printf("hard links: %u%s",(unsigned int) s->st_nlink, blank);
-    printf("user ID: %u%sgroup ID: %u\n",(unsigned int) s->st_uid, blank,(unsigned int) s->st_gid);
-    printf("file size: %d%sfile blocks: %d\n",(int) s->st_size, blank,(int) s->st_blocks);
-    printf("preferred I/O block size: %d\n",(int) s->st_blksize);
-    printf("last access: %slast modified: %slast status: %s", ctime(&s->st_ctime), ctime(&s->st_mtime), ctime(&s->st_atime));
-}
-
 int main(int argc, char *argv[]){
     if(argc < 2){ // check if program has arguments;
         error_quit("no file to check\n");
