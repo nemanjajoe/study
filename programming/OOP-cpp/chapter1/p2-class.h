@@ -1,12 +1,12 @@
 #ifndef _P2_CLASS_H_
 #define _P2_CLASS_H_
 #include<iostream>
-
+#include<iomanip>
 #define MONTH 12
 
 using namespace std;
 
-struct _data_t {
+typedef struct _data_t {
     int month;
     float rainfall;
 } data_t;
@@ -15,6 +15,11 @@ class RainData{
     public:
         RainData(){
             cout<<"making object in type RainData"<<endl;
+            for(int i = 0; i < MONTH; i++){
+                data_t d;
+                data[i] = d;
+            }
+            test();
             init();
         };
         ~RainData(){
@@ -25,8 +30,10 @@ class RainData{
         void getMax();
         void getMin();
     private:
-        typedef data_t data[MONTH];
+        data_t data[MONTH];
         void init();
+        void test();
+        void sort();
 };
 
 #endif
