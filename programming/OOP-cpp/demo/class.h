@@ -1,7 +1,10 @@
 #ifndef _CLASS_H_
 #define _CLASS_H_
 #include<iostream>
+#include<fstream>
 #include<string.h>
+
+using namespace std;
 
 struct point_t {
     int x;
@@ -16,14 +19,15 @@ typedef struct _data_t {
 
 class Dog{
     public:
-        Dog(char *str){
-
+        Dog(char* name){
+            stream.open(name);
         };
         void eat();
         void bark();
     private:
-        char name[];
+        Dog(Dog &);
+        void operator = (Dog &);
+        fstream stream;
         int legs;
-        void sort();
 };
 #endif

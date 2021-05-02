@@ -20,7 +20,7 @@ void showInfo(student_t &person){
     cout<<"phone   :";
     cout<<person.phone<<endl;
     cout<<"E-mial  :";
-    cout<<person.E-mail<<endl;
+    cout<<person.E_mail<<endl;
     cout<<"address :";
     cout<<person.address<<endl;
 }
@@ -31,7 +31,7 @@ void showInfo(student_t &person){
     char* modName(student_t &person){
         char newName[21];
         cout<<"input the new name: ";
-        cin>>newName
+        cin>>newName;
         strcpy(person.name, newName);
         return person.name;
     }
@@ -53,16 +53,16 @@ void showInfo(student_t &person){
         strcpy(person.phone, newPhone);
         return person.phone;
     }
-   // modE-mail : student_t -> string
-    char* modE-mail(studen_t &person){
-        char newE-mail[51];
-        cout<<"input new E-mail address: ";
-        cin>>newE-mail;
-        strcpy(person.E-mail, newE-mail);
-        return person.E-mail;
+   // modE_mail : student_t -> string
+    char* modE_mail(student_t &person){
+        char newE_mail[51];
+        cout<<"input new E_mail address: ";
+        cin>>newE_mail;
+        strcpy(person.E_mail, newE_mail);
+        return person.E_mail;
     }
    // modAddress: student_t -> string
-    char* modAddress(studen_t &person){
+    char* modAddress(student_t &person){
         char newAddress[51];
         cout<<"input new address: ";
         cin>>newAddress;
@@ -72,14 +72,15 @@ void showInfo(student_t &person){
 void modifyInfo(student_t &person){
     bool flag = true;
     int modIndex;
-    char ch;
+    char ch, blank[] = "     ";
     while(flag){
         cout<<"which part you want to modify ?"<<endl;
-        cout<<"1. name   "<<setw(5);
-        cout<<"2. age    "<<setw(5);
-        cout<<"3. phone  "<<setw(5);
-        cout<<"4. E-mail "<<setw(5);
-        cout<<"5. address"<<setw(5)<<endl;
+        cout<<blank<<"1. name   "<<blank;
+        cout<<blank<<"2. age    "<<blank;
+        cout<<blank<<"3. phone  "<<blank;
+        cout<<blank<<"4. E_mail "<<blank;
+        cout<<blank<<"5. address"<<blank;
+        cout<<endl;
         cin>>modIndex;
         switch(modIndex){
             case 1 : cout<<modName(person)   <<endl;
@@ -88,7 +89,7 @@ void modifyInfo(student_t &person){
                      break;
             case 3 : cout<<modPhone(person)  <<endl;
                      break;
-            case 4 : cout<<modE-mail(person) <<endl;
+            case 4 : cout<<modE_mail(person) <<endl;
                      break;
             case 5 : cout<<modAddress(person)<<endl;
                      break;
@@ -114,7 +115,7 @@ void modifyInfo(student_t &person){
 
 // Contact member functions' implementation
 void Contact::add(student_t &student){
-    file.write((char *) student, sizeof(student));
+    file.write((char *) &student, sizeof(student));
     this->count++;
     cout<<"student "<<student.name<<" was added to this contact"<<endl;
 }
@@ -123,7 +124,7 @@ void Contact::displayAll(){
     student_t person;
     for(int i = 0; i < this->count; i++){
         this->file.seekg(getByte(i), ios::beg);
-        this->file.read((char *) &person, sizeof(person))
+        this->file.read((char *) &person, sizeof(person));
         cout<<"the "<< i + 1 <<"th record:"<<endl;
         showInfo(person);
         cout<<endl;
@@ -152,14 +153,14 @@ void Contact::find(char* name){
         this->file.seekg(getByte(i), ios::beg);
         this->file.read((char *) &person, sizeof(person));
         if(strcmp(person.name, name) == 0){
-            cout<<"the "<<name"'s information:"<<endl;
+            cout<<"the "<<name<<"'s information:"<<endl;
             showInfo(person);
         }
     }
     cout<<"can't find student: "<<name<<endl;
 }
 
-void Contact::remove(int recNum){
+void Contact::deletePerson(int recNum){
     fstream tempFile("temp.dat", ios::out);
     if(tempFile.fail()){
         cout<<"create temporary file failed"<<endl;
@@ -170,8 +171,8 @@ void Contact::remove(int recNum){
     bool flag = true;
     char ch;
     for(int i = 0; i < this->count; i++){
-        this->file.seekg(getByte(i), ios:beg);
-        this->read((char *) &person, sizeof(person));
+        this->file.seekg(getByte(i), ios::beg);
+        this->file.read((char *) &person, sizeof(person));
         if(i == recNum){
             cout<<"are you sure to delete the student irrevocably [y/n?]"<<endl;
             showInfo(person);
@@ -188,9 +189,10 @@ void Contact::remove(int recNum){
                 continue;
             }
         }
-        tempFile.write((char *) person, sizeof(person));
+        tempFile.write((char *) &person, sizeof(person));
     }
-    remove(fileName);
+    remove(this->fileName);
     rename("temp.dat",fileName);
-    this->file = &tempFile;
+    this->file.open(this->fileName);
+    this->count--;
 }

@@ -3,13 +3,6 @@
 using namespace std;
 
 void demo(){
-    point_t point;
-    point.x = 9;
-    point.y = 2;
-    //date1.year = 2021;
-    //date1.month = 4;
-    //date1.day = 31;
-    cout<<"test fine"<<endl;
 }
 
 void Dog::eat(){
@@ -18,7 +11,10 @@ void Dog::eat(){
 
 void Dog::bark(){
     cout<<"won won won"<<endl;
-    demo();
-    //sort();
+    char ch;
+    while(!stream.eof()){
+        stream.get(ch);
+        cout<<ch;
+    }
 }
 
