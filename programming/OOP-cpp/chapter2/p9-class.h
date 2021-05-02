@@ -32,12 +32,14 @@ class Contact{
         };
         // object interface
         void add(student_t &student);
-        void display();
+        void displayAll();
         void modify(int recNum);
         void find(char* &name);
-        void remove();
+        void remove(int recNum);
     private:
         fstream file;
+        char fileName[128];
         int count;
+        void test();
 };
 #endif

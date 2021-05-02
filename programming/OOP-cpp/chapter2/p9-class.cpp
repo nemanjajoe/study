@@ -2,13 +2,14 @@
 
 using namespace std;
 
-// Auxiliary functions of this Contact;
+// Auxiliary functions of this Contact; {{{
 
 // getByte: int -> long
 // purpose: calculate how many bytes to read from for a student
 long getByte(int recNum){
     return sizeof(student_t)*recNum;
 }
+
 // showInfo: student_t -> none
 // purpose: display one student's all information
 void showInfo(student_t &person){
@@ -23,21 +24,55 @@ void showInfo(student_t &person){
     cout<<"address :";
     cout<<person.address<<endl;
 }
+
 // modifyInfo: student -> none
 // purpose: modify a student's information
-   // auxiliary functions of modifyIndo
    // modName   : student_t -> string
-    char* modName(student_t &person){}
-   // modAge    : student_t -> string
-
+    char* modName(student_t &person){
+        char newName[21];
+        cout<<"input the new name: ";
+        cin>>newName
+        strcpy(person.name, newName);
+        return person.name;
+    }
+   // modAge    : student_t -> integer
+    int modAge(student_t &person){
+        int newAge;
+        cout<<"input the new age: ";
+        while((cin>>newAge) < 0 || newAge > 200) {
+            cout<<"no such age '"<<newAge<<"' try again!"<<endl;
+        };
+        person.age = newAge;
+        return person.age;
+    }
    // modPhone  : student_t -> string
-
+    char* modPhone(student_t &person){
+        char newPhone[14];
+        cout<<"input the new phone number: ";
+        cin>>newPhone;
+        strcpy(person.phone, newPhone);
+        return person.phone;
+    }
    // modE-mail : student_t -> string
-
+    char* modE-mail(studen_t &person){
+        char newE-mail[51];
+        cout<<"input new E-mail address: ";
+        cin>>newE-mail;
+        strcpy(person.E-mail, newE-mail);
+        return person.E-mail;
+    }
    // modAddress: student_t -> string
+    char* modAddress(studen_t &person){
+        char newAddress[51];
+        cout<<"input new address: ";
+        cin>>newAddress;
+        strcpy(person.address, newAddress);
+        return person.address;
+    }
 void modifyInfo(student_t &person){
     bool flag = true;
-    int modIndex, ch;
+    int modIndex;
+    char ch;
     while(flag){
         cout<<"which part you want to modify ?"<<endl;
         cout<<"1. name   "<<setw(5);
@@ -60,13 +95,21 @@ void modifyInfo(student_t &person){
             default: cout<<"unexpected manipulation, try again!"<<endl;
                      continue;
         }
-        cout<<"continue modify? (y/n): ";
-        if(toupper(cin.get(ch)) == 'Y'){
+        cout<<"continue modify? [y/n?]: ";
+        cin.get(ch);
+        while(toupper(ch) != 'Y' || ch != 'N'){
+            cout<<"unexpect manipulator: "<<ch<<endl;
+            cout<<"'y' for yes , 'n' for no to continue modify"<<endl;
+            cout<<"please input again!"<<endl;
+            cout<<"continue modify? [y/n?]: ";
+            cin.get(ch);
+        }
+        if(ch == 'Y'){
             continue;
         }
         flag = false;
     }
-}
+} //}}}
 
 
 // Contact member functions' implementation
@@ -76,7 +119,7 @@ void Contact::add(student_t &student){
     cout<<"student "<<student.name<<" was added to this contact"<<endl;
 }
 
-void Contact::display(){
+void Contact::displayAll(){
     student_t person;
     for(int i = 0; i < this->count; i++){
         this->file.seekg(getByte(i), ios::beg);
@@ -101,4 +144,53 @@ void Contact::modify(int recNum){
     this->file.write((char *) &person, sizeof(person));
     cout<<"after modified: "<<endl;
     showInfo(person);
+}
+
+void Contact::find(char* name){
+    student_t person;
+    for(int i = 0; i < this->count; i++){
+        this->file.seekg(getByte(i), ios::beg);
+        this->file.read((char *) &person, sizeof(person));
+        if(strcmp(person.name, name) == 0){
+            cout<<"the "<<name"'s information:"<<endl;
+            showInfo(person);
+        }
+    }
+    cout<<"can't find student: "<<name<<endl;
+}
+
+void Contact::remove(int recNum){
+    fstream tempFile("temp.dat", ios::out);
+    if(tempFile.fail()){
+        cout<<"create temporary file failed"<<endl;
+        exit(0);
+    }
+
+    student_t person;
+    bool flag = true;
+    char ch;
+    for(int i = 0; i < this->count; i++){
+        this->file.seekg(getByte(i), ios:beg);
+        this->read((char *) &person, sizeof(person));
+        if(i == recNum){
+            cout<<"are you sure to delete the student irrevocably [y/n?]"<<endl;
+            showInfo(person);
+            cin.get(ch);
+            while(toupper(ch) != 'Y' || ch != 'N'){
+                cout<<"unexpect manipulator: "<<ch<<endl;
+                cout<<"'y' for yes , 'n' for no to continue modify"<<endl;
+                cout<<"please input again!"<<endl;
+                cout<<"are you sure to delete the student irrevocably [y/n?]"<<endl;
+                showInfo(person);
+                cin.get(ch);
+            }
+            if(ch == 'Y'){
+                continue;
+            }
+        }
+        tempFile.write((char *) person, sizeof(person));
+    }
+    remove(fileName);
+    rename("temp.dat",fileName);
+    this->file = &tempFile;
 }
