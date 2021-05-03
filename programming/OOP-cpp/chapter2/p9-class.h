@@ -24,10 +24,10 @@ class Contact{
         // constructor and deconstructor
         Contact(){
             this->count = 0;
-            cout<<"contact constructed"<<endl;
+            cout<<"object constructed"<<endl;
         };
         ~Contact(){
-            cout<<"contact deconstructed"<<endl;
+            cout<<"object destructed"<<endl;
         };
         // object interface
         void add(student_t &student);
@@ -35,6 +35,7 @@ class Contact{
         void modify(int recNum);
         void find(char* name);
         void deletePerson(int recNum);
+        bool open(char *fName);
     private:
         Contact(Contact &);
         void operator = (Contact &);

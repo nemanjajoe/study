@@ -192,7 +192,16 @@ void Contact::deletePerson(int recNum){
         tempFile.write((char *) &person, sizeof(person));
     }
     remove(this->fileName);
-    rename("temp.dat",fileName);
+    rename("temp.dat",this->fileName);
     this->file.open(this->fileName);
     this->count--;
+}
+
+bool Contact::open(char* fName){
+    strcpy(this->fileName, fName);
+    this->file.open(this->fileName);
+    if(this->file.fail()){
+        cout<<"can't open file: "<<this->fileName<<endl;
+        return false;
+    }
 }
