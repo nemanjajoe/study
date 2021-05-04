@@ -4,6 +4,31 @@ using namespace std;
 
 // Auxiliary functions of this Contact; {{{
 
+// getCounts: fstream -> integer
+// purpose: calculate how many records are in this file
+int getCounts(fstream &file){
+    int counts = 0;
+    student_t person;
+    while(!file.eof()){
+        file.read((char *) &person, sizeof(person));
+        //showInfo(person);
+        counts++;
+    }
+    file.clear();
+    return counts - 1;
+}
+
+// createFile: string -> none
+// purpose: create a file with the file name
+void createFile(char* name){
+    ofstream file(name);
+    if(file.fail()){
+        cout<<"can't create file: "<<name<<endl;
+        exit(0);
+    }
+    file.close();
+}
+
 // getByte: int -> long
 // purpose: calculate how many bytes to read from for a student
 long getByte(int recNum){
@@ -93,17 +118,16 @@ void modifyInfo(student_t &person){
                      break;
             case 5 : cout<<modAddress(person)<<endl;
                      break;
-            default: cout<<"unexpected manipulation, try again!"<<endl;
-                     continue;
         }
         cout<<"continue modify? [y/n?]: ";
         cin.get(ch);
-        while(toupper(ch) != 'Y' || ch != 'N'){
+        ch = toupper(ch);
+        while(ch != 'Y' && ch != 'N'){
+            cout<<endl;
             cout<<"unexpect manipulator: "<<ch<<endl;
-            cout<<"'y' for yes , 'n' for no to continue modify"<<endl;
-            cout<<"please input again!"<<endl;
             cout<<"continue modify? [y/n?]: ";
             cin.get(ch);
+            ch = toupper(ch);
         }
         if(ch == 'Y'){
             continue;
@@ -111,7 +135,6 @@ void modifyInfo(student_t &person){
         flag = false;
     }
 } //}}}
-
 
 // Contact member functions' implementation
 void Contact::add(student_t &student){
@@ -122,13 +145,19 @@ void Contact::add(student_t &student){
 
 void Contact::displayAll(){
     student_t person;
-    for(int i = 0; i < this->count; i++){
-        this->file.seekg(getByte(i), ios::beg);
-        this->file.read((char *) &person, sizeof(person));
-        cout<<"the "<< i <<"th record:"<<endl;
-        showInfo(person);
+    if(this->count == 0){
         cout<<endl;
-    }
+        cout<<"no file opened , please open a file first!";
+        cout<<endl;
+    }else{
+        for(int i = 0; i < this->count; i++){
+            this->file.seekg(getByte(i), ios::beg);
+            this->file.read((char *) &person, sizeof(person));
+            cout<<"the "<< i <<"th record:"<<endl;
+            showInfo(person);
+            cout<<endl;
+        }
+   }
 }
 
 bool Contact::modify(int recNum){
@@ -170,7 +199,9 @@ bool Contact::deletePerson(int recNum){
         return false;
     }
 
-    fstream tempFile("temp.dat", ios::out);
+    char tempFileName[] = "temp.dat";
+    createFile(tempFileName);
+    fstream tempFile(tempFileName, ios::out);
     if(tempFile.fail()){
         cout<<"create temporary file failed"<<endl;
         exit(0);
@@ -186,13 +217,15 @@ bool Contact::deletePerson(int recNum){
             cout<<"are you sure to delete the student irrevocably [y/n?]"<<endl;
             showInfo(person);
             cin.get(ch);
-            while(toupper(ch) != 'Y' || ch != 'N'){
+            ch = toupper(ch);
+            while(ch != 'Y' && ch != 'N'){
                 cout<<"unexpect manipulator: "<<ch<<endl;
                 cout<<"'y' for yes , 'n' for no to continue modify"<<endl;
                 cout<<"please input again!"<<endl;
                 cout<<"are you sure to delete the student irrevocably [y/n?]"<<endl;
                 showInfo(person);
                 cin.get(ch);
+                ch = toupper(ch);
             }
             if(ch == 'Y'){
                 continue;
@@ -201,17 +234,77 @@ bool Contact::deletePerson(int recNum){
         tempFile.write((char *) &person, sizeof(person));
     }
     remove(this->fileName);
-    rename("temp.dat",this->fileName);
-    this->file.open(this->fileName);
+    rename(tempFileName,this->fileName);
+    this->file.open(this->fileName, ios::in | ios::out);
     this->count--;
     return true;
 }
 
+// save: none
+// purpose: save the status of this file and close file;
+void Contact::save(){
+    if(this->count > 0){
+        this->count = 0;
+        this->file.close();
+    }
+}
+
 bool Contact::open(char* fName){
+    char ch;
+
     strcpy(this->fileName, fName);
-    this->file.open(this->fileName);
+    this->save();
+    this->file.open(this->fileName, ios::in | ios::out);
+    this->count = getCounts(this->file);
+    cout<<endl<<"the count is : "<<this->count<<endl;
     if(this->file.fail()){
-        cout<<"can't open file: "<<this->fileName<<endl;
+        cout<<"can't open file(p9-class.cpp : Contact::open ): "<<this->fileName<<endl;
         return false;
     }
+    this->displayAll();
+    return true;
+}
+
+// test:
+// purpose: test if all functions are correct;
+void Contact::test(){
+    char testFileName[] = "testFile.dat";
+    createFile(testFileName);
+
+    student_t person[4] = {
+        {"Jesson Ben" , 21, "898-1234-123", "Jesson@mail.com" , "hnust, hunan, china"         },
+        {"Abelson Joe", 34, "796-3324-846", "Abelson@mail.com", "alber, locky, United Kingdom"},
+        {"Jay Sussman", 32, "976-4215-643", "Sussman@mail.com", "northy, wortkey, singapore"  },
+        {"Alan Yayger", 23, "897-5523-667", "Yayger@mail.com" , "orsaypho, norman, frence"    }
+    };
+
+    this->file.open(testFileName, ios::in | ios::out);
+    if(this->file.fail()){
+        cout<<"open temporary file failed (p9-class.cpp 231)"<<endl;
+        exit(0);
+    }
+
+    for(int i = 0; i < 4; i++){
+        cout<<"testing add and display function ...."<<endl;
+        sleep(1);
+        this->add(person[i]);
+        cout<<endl;
+        this->displayAll();
+        sleep(1);
+    }
+
+    cout<<"testing find function ...."<<endl;
+    sleep(1);
+    this->find(person[2].name);
+    cout<<endl;
+
+    cout<<"testing delete function ...."<<endl;
+    cout<<"deleting record 2"<<endl;
+    sleep(1);
+    cout<<"deleting ...."<<endl;
+    //this->deletePerson(2);
+    this->displayAll();
+
+    cout<<"testing over ..."<<endl;
+    this->save();
 }

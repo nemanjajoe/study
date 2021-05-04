@@ -8,6 +8,7 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
+#include<unistd.h>
 
 using namespace std;
 
@@ -24,6 +25,7 @@ class Contact{
         // constructor and deconstructor
         Contact(){
             this->count = 0;
+            test();
             cout<<"object constructed"<<endl;
         };
         ~Contact(){
@@ -36,6 +38,7 @@ class Contact{
         void find(char* name);
         bool deletePerson(int recNum);
         bool open(char *fName);
+        void save();
     private:
         Contact(Contact &);
         void operator = (Contact &);

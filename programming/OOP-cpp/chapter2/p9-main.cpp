@@ -25,7 +25,7 @@
 
 using namespace std;
 
-// Auxiliary functions
+// Auxiliary functions {{{
 
 // printMenu: string -> user output;
 // puepose  : print the menu in format;
@@ -49,29 +49,32 @@ void addHelper(student_t &person){
 
     cout<<"input the name of this person: ";
     cin>>person.name;
-    cout<<endl;
+    cout<<"name: "<<person.name<<endl;
 
     cout<<"input the age of this person : ";
-    cin>>person.age;
-    while(person.age < 0 && person.age >= 200){
+    int age;
+    cin>>age;
+    cout<<"age: "<<age<<endl;
+    while(age < 0 || age >= 200){
         cout<<endl;
         cout<<"age should not less than 0 or more than 200"<<endl;
-        cout<<"input the age again: "<<endl;
-        cin>>person.age;
+        cout<<"input the age again: ";
+        cin>>age;
+        cout<<"age: "<<age<<endl;
     }
-    cout<<endl;
+    person.age = age;
 
     cout<<"input the phone number of this person: ";
     cin>>person.phone;
-    cout<<endl;
+    cout<<"phone: "<<person.phone<<endl;
 
     cout<<"input the E-mail of this person: ";
     cin>>person.E_mail;
-    cout<<endl;
+    cout<<"E-mail: "<<person.E_mail<<endl;
 
     cout<<"input the address of this person: ";
     cin>>person.address;
-    cout<<endl;
+    cout<<"address: "<<person.address<<endl;
 }
 void add(Contact &contact){
     student_t person;
@@ -81,14 +84,16 @@ void add(Contact &contact){
     char ch;
     while(flag){
         cout<<endl;
-        cout<<"correct information, are you sure ? [y/n] : ";
+        cout<<"confirm information: are you sure all correct ? [y/n] : ";
         cin.get(ch);
         cout<<ch<<endl;
-        toupper(ch);
+        ch = toupper(ch);
         if(ch == 'Y'){
             contact.add(person);
             flag = false;
         }else if(ch == 'N'){
+            cout<<endl;
+            cout<<"input again!"<<endl;
             addHelper(person);
         }
     }
@@ -160,14 +165,12 @@ int getOrder(){
     char ch;
     cin.get(ch);
     return ch - 48;
-}
-
+} // }}}
 
 int main(){
     Contact contact;
     printMenu();
     while(1){
-        //printMenu();
         switch(getOrder()){
             case 1: add(contact);
                     break;
@@ -179,7 +182,8 @@ int main(){
                     break;
             case 5: del(contact);
                     break;
-            case 6: return 0; // exit this program;
+            case 6: contact.save(); // exit this program;
+                    return 0;
                     break;
             case 7: open(contact);
                     break;
