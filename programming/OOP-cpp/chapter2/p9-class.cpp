@@ -137,30 +137,39 @@ void modifyInfo(student_t &person){
 } //}}}
 
 // Contact member functions' implementation
-void Contact::add(student_t &student){
+
+bool Contact::add(student_t &student){
+    if(!this->hasFile){
+        cout<<"no file was opened, please open a file first!!"<<endl;
+        return false;
+    }
     file.write((char *) &student, sizeof(student));
     this->count++;
     cout<<"student "<<student.name<<" was added to this contact"<<endl;
+    return true;
 }
 
-void Contact::displayAll(){
+bool Contact::displayAll(){
+    if(!this->hasFile){
+        cout<<"no file was opened, please open a file first!!"<<endl;
+        return false;
+    }
     student_t person;
-    if(this->count == 0){
+    for(int i = 0; i < this->count; i++){
+        this->file.seekg(getByte(i), ios::beg);
+        this->file.read((char *) &person, sizeof(person));
+        cout<<"the "<< i <<"th record:"<<endl;
+        showInfo(person);
         cout<<endl;
-        cout<<"no file opened , please open a file first!";
-        cout<<endl;
-    }else{
-        for(int i = 0; i < this->count; i++){
-            this->file.seekg(getByte(i), ios::beg);
-            this->file.read((char *) &person, sizeof(person));
-            cout<<"the "<< i <<"th record:"<<endl;
-            showInfo(person);
-            cout<<endl;
-        }
-   }
+    }
+    return true;
 }
 
 bool Contact::modify(int recNum){
+    if(!this->hasFile){
+        cout<<"no file was opened, please open a file first!!"<<endl;
+        return false;
+    }
     student_t person;
 
     if(recNum < 0 || recNum >= this->count){
@@ -181,7 +190,11 @@ bool Contact::modify(int recNum){
     return true;
 }
 
-void Contact::find(char* name){
+bool Contact::find(char* name){
+    if(!this->hasFile){
+        cout<<"no file was opened, please open a file first!!"<<endl;
+        return false;
+    }
     student_t person;
     for(int i = 0; i < this->count; i++){
         this->file.seekg(getByte(i), ios::beg);
@@ -189,12 +202,18 @@ void Contact::find(char* name){
         if(strcmp(person.name, name) == 0){
             cout<<"the "<<name<<"'s information:"<<endl;
             showInfo(person);
+            return true;
         }
     }
     cout<<"can't find student: "<<name<<endl;
+    return false;
 }
 
 bool Contact::deletePerson(int recNum){
+    if(!this->hasFile){
+        cout<<"no file was opened, please open a file first!!"<<endl;
+        return false;
+    }
     if(recNum < 0 || recNum >= this->count){
         return false;
     }
@@ -220,9 +239,7 @@ bool Contact::deletePerson(int recNum){
             ch = toupper(ch);
             while(ch != 'Y' && ch != 'N'){
                 cout<<"unexpect manipulator: "<<ch<<endl;
-                cout<<"'y' for yes , 'n' for no to continue modify"<<endl;
                 cout<<"please input again!"<<endl;
-                cout<<"are you sure to delete the student irrevocably [y/n?]"<<endl;
                 showInfo(person);
                 cin.get(ch);
                 ch = toupper(ch);
@@ -233,34 +250,37 @@ bool Contact::deletePerson(int recNum){
         }
         tempFile.write((char *) &person, sizeof(person));
     }
+    tempFile.close();
+    this->save();
     remove(this->fileName);
     rename(tempFileName,this->fileName);
-    this->file.open(this->fileName, ios::in | ios::out);
-    this->count--;
+    this->open(this->fileName);
     return true;
 }
 
 // save: none
-// purpose: save the status of this file and close file;
+// purpose: clear status and close file;
 void Contact::save(){
-    if(this->count > 0){
+    if(this->hasFile){
+        this->hasFile = false;
         this->count = 0;
         this->file.close();
     }
 }
 
 bool Contact::open(char* fName){
-    char ch;
-
     strcpy(this->fileName, fName);
+
     this->save();
     this->file.open(this->fileName, ios::in | ios::out);
-    this->count = getCounts(this->file);
-    cout<<endl<<"the count is : "<<this->count<<endl;
     if(this->file.fail()){
         cout<<"can't open file(p9-class.cpp : Contact::open ): "<<this->fileName<<endl;
         return false;
     }
+
+    this->count = getCounts(this->file);
+    cout<<endl<<"the count is : "<<this->count<<endl;
+    this->hasFile = true;
     this->displayAll();
     return true;
 }
@@ -278,29 +298,25 @@ void Contact::test(){
         {"Alan Yayger", 23, "897-5523-667", "Yayger@mail.com" , "orsaypho, norman, frence"    }
     };
 
-    this->file.open(testFileName, ios::in | ios::out);
-    if(this->file.fail()){
-        cout<<"open temporary file failed (p9-class.cpp 231)"<<endl;
-        exit(0);
-    }
+    this->open(testFileName);
 
     for(int i = 0; i < 4; i++){
         cout<<"testing add and display function ...."<<endl;
-        sleep(1);
+        sleep(0.6);
         this->add(person[i]);
         cout<<endl;
         this->displayAll();
-        sleep(1);
+        sleep(0.6);
     }
 
     cout<<"testing find function ...."<<endl;
-    sleep(1);
+    sleep(0.6);
     this->find(person[2].name);
     cout<<endl;
 
     cout<<"testing delete function ...."<<endl;
     cout<<"deleting record 2"<<endl;
-    sleep(1);
+    sleep(0.6);
     cout<<"deleting ...."<<endl;
     //this->deletePerson(2);
     this->displayAll();

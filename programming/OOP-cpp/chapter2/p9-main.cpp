@@ -76,7 +76,11 @@ void addHelper(student_t &person){
     cin>>person.address;
     cout<<"address: "<<person.address<<endl;
 }
-void add(Contact &contact){
+bool add(Contact &contact){
+    if(!contact.displayAll()){
+        return false;
+    }
+
     student_t person;
     addHelper(person);
 
@@ -101,7 +105,10 @@ void add(Contact &contact){
 void display(Contact &contact){
     contact.displayAll();
 }
-void modify(Contact &contact){
+bool modify(Contact &contact){
+    if(!contact.displayAll()){
+        return false;
+    }
     int recNum;
     student_t person;
 
@@ -111,17 +118,22 @@ void modify(Contact &contact){
         cout<<"unvalid record, try again!"<<endl;
     }
 }
-void find(Contact &contact){
+bool find(Contact &contact){
+    if(!contact.displayAll()){
+        return false;
+    }
     char name[21];
     cout<<"input the person's name: ";
     cin>>name;
     contact.find(name);
 }
-void del(Contact &contact){
+bool del(Contact &contact){
+    if(!contact.displayAll()){
+        return false;
+    }
     int recNum;
     student_t person;
 
-    contact.displayAll();
     cout<<"which record you want to delete ?(note: input the record number): ";
     while(cin>>recNum, !contact.deletePerson(recNum)){
         cout<<"unvalid record, try again!"<<endl;

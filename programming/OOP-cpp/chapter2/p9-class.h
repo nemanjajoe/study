@@ -9,6 +9,7 @@
 #include<string.h>
 #include<stdlib.h>
 #include<unistd.h>
+#include<stdio.h>
 
 using namespace std;
 
@@ -32,10 +33,10 @@ class Contact{
             cout<<"object destructed"<<endl;
         };
         // object interface
-        void add(student_t &student);
-        void displayAll();
+        bool add(student_t &student);
+        bool displayAll();
         bool modify(int recNum);
-        void find(char* name);
+        bool find(char* name);
         bool deletePerson(int recNum);
         bool open(char *fName);
         void save();
@@ -47,5 +48,6 @@ class Contact{
         char fileName[128];
         int count;
         void test();
+        bool hasFile;
 };
 #endif
