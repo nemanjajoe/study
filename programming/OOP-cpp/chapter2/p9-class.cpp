@@ -12,7 +12,7 @@ long getByte(int recNum){
 
 // showInfo: student_t -> none
 // purpose: display one student's all information
-void showInfo(student_t &person){
+extern void showInfo(student_t &person){
     cout<<"name    :";
     cout<<person.name<<endl;
     cout<<"age     :";
@@ -125,14 +125,18 @@ void Contact::displayAll(){
     for(int i = 0; i < this->count; i++){
         this->file.seekg(getByte(i), ios::beg);
         this->file.read((char *) &person, sizeof(person));
-        cout<<"the "<< i + 1 <<"th record:"<<endl;
+        cout<<"the "<< i <<"th record:"<<endl;
         showInfo(person);
         cout<<endl;
     }
 }
 
-void Contact::modify(int recNum){
+bool Contact::modify(int recNum){
     student_t person;
+
+    if(recNum < 0 || recNum >= this->count){
+        return false;
+    }
 
     this->file.seekg(getByte(recNum), ios::beg);
     this->file.read((char *) &person, sizeof(person));
@@ -145,6 +149,7 @@ void Contact::modify(int recNum){
     this->file.write((char *) &person, sizeof(person));
     cout<<"after modified: "<<endl;
     showInfo(person);
+    return true;
 }
 
 void Contact::find(char* name){
@@ -160,7 +165,11 @@ void Contact::find(char* name){
     cout<<"can't find student: "<<name<<endl;
 }
 
-void Contact::deletePerson(int recNum){
+bool Contact::deletePerson(int recNum){
+    if(recNum < 0 || recNum >= this->count){
+        return false;
+    }
+
     fstream tempFile("temp.dat", ios::out);
     if(tempFile.fail()){
         cout<<"create temporary file failed"<<endl;
@@ -195,6 +204,7 @@ void Contact::deletePerson(int recNum){
     rename("temp.dat",this->fileName);
     this->file.open(this->fileName);
     this->count--;
+    return true;
 }
 
 bool Contact::open(char* fName){

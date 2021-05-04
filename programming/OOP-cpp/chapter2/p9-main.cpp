@@ -45,14 +45,89 @@ void printMenu(){
 }
 
 // mini helper function for Menu;
-void add(Contact &c){
+void addHelper(student_t &person){
 
+    cout<<"input the name of this person: ";
+    cin>>person.name;
+    cout<<endl;
+
+    cout<<"input the age of this person : ";
+    cin>>person.age;
+    while(person.age < 0 && person.age >= 200){
+        cout<<endl;
+        cout<<"age should not less than 0 or more than 200"<<endl;
+        cout<<"input the age again: "<<endl;
+        cin>>person.age;
+    }
+    cout<<endl;
+
+    cout<<"input the phone number of this person: ";
+    cin>>person.phone;
+    cout<<endl;
+
+    cout<<"input the E-mail of this person: ";
+    cin>>person.E_mail;
+    cout<<endl;
+
+    cout<<"input the address of this person: ";
+    cin>>person.address;
+    cout<<endl;
 }
-void display(Contact &c){}
-void modify(Contact &c){}
-void find(Contact &c){}
-void del(Contact &c){}
-void open(Contact &c){}
+void add(Contact &contact){
+    student_t person;
+    addHelper(person);
+
+    bool flag = true;
+    char ch;
+    while(flag){
+        cout<<endl;
+        cout<<"correct information, are you sure ? [y/n] : ";
+        cin.get(ch);
+        cout<<ch<<endl;
+        toupper(ch);
+        if(ch == 'Y'){
+            contact.add(person);
+            flag = false;
+        }else if(ch == 'N'){
+            addHelper(person);
+        }
+    }
+}
+void display(Contact &contact){
+    contact.displayAll();
+}
+void modify(Contact &contact){
+    int recNum;
+    student_t person;
+
+    contact.displayAll();
+    cout<<"which record you want to modify ? (note: input the record number)";
+    while(cin>>recNum, !contact.modify(recNum)){
+        cout<<"unvalid record, try again!"<<endl;
+    }
+}
+void find(Contact &contact){
+    char name[21];
+    cout<<"input the person's name: ";
+    cin>>name;
+    contact.find(name);
+}
+void del(Contact &contact){
+    int recNum;
+    student_t person;
+
+    contact.displayAll();
+    cout<<"which record you want to delete ?(note: input the record number): ";
+    while(cin>>recNum, !contact.deletePerson(recNum)){
+        cout<<"unvalid record, try again!"<<endl;
+    }
+}
+void open(Contact &contact){
+    char fileName[128];
+    cout<<"input the file you want to open: ";
+    cin>>fileName;
+    contact.open(fileName);
+}
 void help(){
     char ch;
     cout<<endl;

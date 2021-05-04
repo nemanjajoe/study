@@ -32,9 +32,9 @@ class Contact{
         // object interface
         void add(student_t &student);
         void displayAll();
-        void modify(int recNum);
+        bool modify(int recNum);
         void find(char* name);
-        void deletePerson(int recNum);
+        bool deletePerson(int recNum);
         bool open(char *fName);
     private:
         Contact(Contact &);
