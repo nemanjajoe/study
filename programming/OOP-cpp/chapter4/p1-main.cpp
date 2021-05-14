@@ -44,6 +44,8 @@ int main(){
     cout<<"numday1 days : "<<numday1.getDays()<<endl;
     cout<<"numday2 hours: "<<numday2.getHours()<<endl;
     cout<<"numday2 days : "<<numday2.getDays()<<endl;
-    cout<<"numday1 + numday2: "<<numday1 + numday2<<endl;
+
+    NumDays numdaySum = numday1 + numday2;
+    cout<<"numday1 + numday2 hours: "<<numdaySum.getHours()<<endl;
 return 0;
 }

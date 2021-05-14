@@ -1,7 +1,9 @@
 #include "p1-class.h"
 #include<iostream>
 
-NumDays::NumDays(float hours = 0){
+using namespace std;
+
+NumDays::NumDays(float hours){
     this->hours = hours;
     this->calculateDays();
 }
@@ -41,12 +43,16 @@ float NumDays::getDays(){
     return this->days;
 }
 
-float NumDays::operator+(const NumDays &obj){
-    return this->hours + obj.hours;
+NumDays NumDays::operator+(const NumDays &obj){
+    NumDays temp;
+    temp.setHours(this->hours + obj.hours);
+    return temp;
 }
 
-float NumDays::operator-(const NumDays &obj){
-    return this->hours - obj.hours;
+NumDays NumDays::operator-(const NumDays &obj){
+    NumDays temp;
+    temp.setHours(this->hours - obj.hours);
+    return temp;
 }
 
 void NumDays::operator++(){

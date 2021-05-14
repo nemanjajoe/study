@@ -9,12 +9,16 @@ class NumDays{
         bool setDays(float days);
         float getHours();
         float getDays();
-        NumDays(float);
+        NumDays(){
+            hours = 0;
+            calculateDays();
+        };
+        NumDays(float hours);
         NumDays(const NumDays &obj);
         ~NumDays();
 
-        float operator+(const NumDays &obj);
-        float operator-(const NumDays &obj);
+        NumDays operator+(const NumDays &obj);
+        NumDays operator-(const NumDays &obj);
         void  operator++();
         void  operator++(int);
         void  operator--();
