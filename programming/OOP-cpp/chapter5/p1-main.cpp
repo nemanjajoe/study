@@ -32,7 +32,9 @@ using namespace std;
 
 int main(){
     MilTime mt1(1735,45);
-    cout<<"main function";
+    cout<<"military hour: "<<mt1.getHour()<<endl;
+    cout<<"standard hour: "<<mt1.getStandHr()<<endl;
+    cout<<"main function"<<endl;;
 return 0;
 }
 
