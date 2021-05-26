@@ -43,13 +43,13 @@ int main(){
     do{
         cout<<"input your name:"<<endl;
         cin>>name;
-        if(!man.setName(name)){
+        while(!man.setName(name)){
             cout<<"incorrect name format, input again!"<<endl;
             cin>>name;
         }
         cout<<"input your ID:"<<endl;
         cin>>ID;
-        if(!man.setID(ID)){
+        while(!man.setID(ID)){
             cout<<"incorrect ID format, input again!"<<endl;
             cin>>ID;
         }
