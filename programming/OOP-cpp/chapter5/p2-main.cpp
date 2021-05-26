@@ -22,10 +22,47 @@
 //************************************************************************
 
 #include "p2-class.h"
+#include <iostream>
+
+#define LEN 64
 
 using namespace std;
 
-int main(){
+void displayInfo(EmployeePay &m){
+    cout<<"name: "<<m.getName()<<endl;
+    cout<<"ID  : "<<m.getID()<<endl;
+    cout<<"salary/month: "<<m.getSalary()<<endl;
+    cout<<"department: "<<m.getDepart()<<endl;
+}
 
+int main(){
+    EmployeePay man;
+    char name[LEN], ID[LEN], ch;
+    float salary;
+    int department;
+    do{
+        cout<<"input your name:"<<endl;
+        cin>>name;
+        if(!man.setName(name)){
+            cout<<"incorrect name format, input again!"<<endl;
+            cin>>name;
+        }
+        cout<<"input your ID:"<<endl;
+        cin>>ID;
+        if(!man.setID(ID)){
+            cout<<"incorrect ID format, input again!"<<endl;
+            cin>>ID;
+        }
+        cout<<"input monthly salary:"<<endl;
+        cin>>salary;
+        man.setSalary(salary);
+        cout<<"input your department:"<<endl;
+        cin>>department;
+        man.setDepart(department);
+        displayInfo(man);
+        cout<<"quit program ? [y/n]:"<<endl;
+        cin>>ch;
+        if(ch == 'y') break;
+    }while(1);
     return 0;
 }
