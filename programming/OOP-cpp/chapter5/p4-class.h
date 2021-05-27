@@ -10,9 +10,9 @@ class TimeClock: public MilTime{
     public:
         TimeClock();
         ~TimeClock();
-        bool setStartTime(int miliTime, int sec);
-        bool setEndTime(int miliTime, int sec);
+        bool setStartTime(int miliTime);
+        bool setEndTime(int miliTime);
         float getDiffHours();
-}
+};
 
 #endif
