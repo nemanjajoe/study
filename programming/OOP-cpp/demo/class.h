@@ -1,22 +1,17 @@
-class Time{
-    protected:
-        int hour;
+
+class Anny{
+    private:
+        int value;
     public:
-        Time(int h = 0){
-            hour = h;
+        Anny(){};
+        Anny(int v){
+            value = v;
         };
-        void setHour(int h){hour = h;}
-};
-class MilTime : public Time{
-    protected:
-        int milHour;
-    public:
-        MilTime(int miliTime = 0){
-            setTime(miliTime);
+        Anny(Anny &obj){
+            this->value = obj.getValue();
+        };
+        ~Anny(){};
+        int getValue(){
+            return value;
         }
-        void setTime(int miliTime){
-            setHour(miliTime / 100);
-            this->milHour = miliTime;
-        };
-        int getHour(){return hour;};
 };

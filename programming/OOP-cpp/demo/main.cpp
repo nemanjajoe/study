@@ -4,7 +4,7 @@
 using namespace std;
 
 int main(){
-    MilTime mt1(1925);
-    cout<<mt1.getHour();
-return 0;
+    Anny a1(2), a2;
+    a2 = a1;
+    return 0;
 }
